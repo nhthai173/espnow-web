@@ -457,3 +457,82 @@ class ATEditItem extends ATModal {
         this.destroy()
     }
 }
+
+class ATEditPeriod {
+    static currentModal = null
+    
+    static init() {
+        document.querySelectorAll('.at-period').forEach($card => {
+            const period = $card.getAttribute('period')
+            $card.addEventListener('click', () => {
+                const $check = $card.querySelector('input[type="checkbox"]')
+                document.querySelectorAll('.at-period input[type="checkbox"]').forEach(c => {
+                    if (c != $check) c.checked = false
+                })
+                $check.checked = true
+                document.querySelectorAll('.at-period .collapse').forEach(c => bootstrap.Collapse.getInstance(c)?.hide())
+                if (period == 'specific') {
+                    new bootstrap.Collapse($card.querySelector('.collapse')).show()
+                }
+            })
+        })
+        document.querySelector('.at-period-repeat .collapse-click').addEventListener('click', (e) => {
+            const collapse = new bootstrap.Collapse('.at-period-repeat .collapse').toggle()
+            document.querySelector('.at-period-repeat .collapse-click i').classList.toggle('collapse-show')
+        })
+        document.querySelectorAll('.at-repeat-item').forEach($item => {
+            $item.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    $item.querySelector('input[type="checkbox"]').click()
+                }
+                ATEditPeriod.currentModal?.renderRepeat()
+            })
+        })
+    }
+
+    constructor(data) {
+        ATEditPeriod.currentModal = this
+        this.$modal = document.getElementById('atEditPeriodModal')
+        this.data = data
+
+        this.renderRepeat()
+
+        new bootstrap.Modal(this.$modal).show()
+    }
+
+    renderRepeat() {
+        let repeat = {}
+        let repeatValues
+        let text = ""
+        this.$modal.querySelectorAll('.at-repeat-item').forEach(c => {
+            repeat[c.getAttribute('value')] = c.querySelector('input[type="checkbox"]').checked
+        })
+        repeatValues = Object.values(repeat).filter(v => v)
+        if (repeatValues.length === 0)
+            text = "Never"
+        else if (repeatValues.length === 7)
+            text = "Every day"
+        else if (repeatValues.length === 2 && repeat['sunday'] && repeat['saturday'])
+            text = "Every weekends"
+        else if (repeatValues.length === 5 && !repeat['sunday'] && !repeat['saturday'])
+            text = "Every weekdays"
+        else {
+            text = []
+            for (const day in repeat) {
+                if (repeat[day]) {
+                    if (repeatValues.length > 3) {
+                        text.push(day.charAt(0).toUpperCase() + day.substring(1, 3))
+                    } else {
+                        text.push(day.charAt(0).toUpperCase() + day.slice(1))
+                    }
+                }
+            }
+            text = text.join(', ')
+            text = 'Every ' + text
+        }
+        this.$modal.querySelector('.at-repeat-text').textContent = text
+    }
+
+}
+
+ATEditPeriod.init()

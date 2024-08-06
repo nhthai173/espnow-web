@@ -104,6 +104,13 @@
         .at-item.at-new .index {
             color: rgb(var(--bs-primary-rgb));
         }
+
+        .collapse-click i {
+            transition: all 0.3s;
+        }
+        .collapse-click i.collapse-show {
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 
@@ -280,7 +287,7 @@
 
 
 
-
+    <!-- Period modal -->
     <div class="modal fade" id="atEditPeriodModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down">
             <div class="modal-content">
@@ -295,7 +302,7 @@
                 <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
                     <h3 role="title" class="at-title">Effective period</h3>
 
-                    <div class="card card-1">
+                    <div class="card card-1 at-period" period="all">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <span class="fs-5">All day</span>
@@ -306,7 +313,7 @@
                         </div>
                     </div>
 
-                    <div class="card card-1">
+                    <div class="card card-1 at-period" period="specific">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <span class="fs-5">Specific time period</span>
@@ -333,53 +340,53 @@
 
                     <hr>
 
-                    <div class="card card-1 mt-4">
+                    <div class="card card-1 mt-4 at-period-repeat">
                         <div class="card-body">
-                            <div class="d-flex-center fs-5">
+                            <div class="d-flex-center fs-5 collapse-click">
                                 <span>Repeat</span>
                                 <span class="ms-auto text-muted">
-                                    Everyday
+                                    <span class="at-repeat-text"></span>
                                     <i class="ms-2 fal fa-chevron-right fs-6"></i>
                                 </span>
                             </div>
-                            <div>
-                                <div class="d-flex-center fs-6 mt-3">
+                            <div class="collapse">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="monday">
                                     <span>Monday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="tuesday">
                                     <span>Tuesday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="wednesday">
                                     <span>Wednesday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="thursday">
                                     <span>Thursday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="friday">
                                     <span>Friday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="saturday">
                                     <span>Saturday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3">
+                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="sunday">
                                     <span>Sunday</span>
                                     <div class="ms-auto form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
@@ -620,7 +627,7 @@
         })
 
 
-        new bootstrap.Modal('#atEditPeriodModal').show()
+        new ATEditPeriod()
 
 
     </script>
