@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css" rel="stylesheet"
+        type="text/css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notiflix@3.2.7/src/notiflix.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .card-at {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-check-lg .form-check-input {
+            width: 3.5em !important;
+            height: 1.7em !important;
+        }
+
+        .select-lg {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .select-lg::after {
+            font-family: "Font Awesome 5 Pro";
+            content: "\f078";
+            font-size: 1.5em;
+            opacity: 0.5;
+            font-weight: lighter;
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+        }
+
+        .select-option {
+            display: none;
+        }
+
+        .select-option[selected] {
+            display: block;
+        }
+
+        .form-none {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background-color: transparent !important;
+        }
+
+        .at-title {
+            font-size: 1.75em;
+            font-weight: 500;
+            margin-top: 0.4em;
+            margin-bottom: 0.7em;
+        }
+
+        .at-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+
+        .at-item .index {
+            width: 40px;
+            text-align: center;
+            margin-right: 0.4em;
+            color: var(--muted-light);
+            font-size: 1.5em;
+        }
+
+        .at-item .title {
+            font-size: 1.5em;
+        }
+
+        .at-item .subtitle {
+            color: var(--muted-light);
+        }
+
+        .at-item.at-edit::after {
+            font-family: "Font Awesome 5 Pro";
+            content: "\f054";
+            font-size: 1.2em;
+            font-weight: lighter;
+            opacity: 0.5;
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+        }
+
+        .at-item.at-new {
+            padding-top: 0.6em;
+        }
+
+        .at-item.at-new,
+        .at-item.at-new .index {
+            color: rgb(var(--bs-primary-rgb));
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Nav -->
+    <nav class="navbar main-navbar bg-body-tertiary fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-brand fs-4">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <span class="ms-1 ms-md-3">Automations</span>
+            </div>
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title fs-4">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav justify-content-end flex-grow-1 pe-3 fs-5">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="./">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./devices.html">Devices</a>
+                        </li>
+                        <li>
+                            <a class="nav-link active" href="./automations.html">Automations</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div action="addAT">
+                <div class="d-none d-md-block">
+                    <button class="btn btn-outline-secondary">Add new automation</button>
+                </div>
+                <div class="d-block d-md-none">
+                    <a href="#" class="text-body me-2" action="addAT"><i class="fs-4 fal fa-plus-circle"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+
+
+
+
+
+    <!-- Edit automation modal -->
+    <div class="modal fade" id="atEditModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="btn btn-icon fs-4" action="atDiscard">
+                        <i class="fal fa-times" action="atDiscard"></i>
+                    </button>
+                    <button class="ms-auto btn btn-icon fs-4" action="atSave">
+                        <i class="fal fa-check" action="atSave"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 class="at-title" role="title"></h3>
+                    <div class="card card-1">
+                        <div class="card-body">
+                            <input class="fs-5 w-100 form-none" type="text" placeholder="Automation name" name="atName">
+                        </div>
+                    </div>
+                    <div class="mt-5 mb-4">
+                        <div class="select-lg" data-bs-toggle="dropdown" name="atMatchType">
+                            <h3 class="select-option at-title" value="0" selected>When any of situations occur</h3>
+                            <h3 class="select-option at-title" value="1">When all of situations occur</h3>
+                        </div>
+                    </div>
+
+                    <div class="card card-1" at-type="trigger">
+                        <div class="card-body pointer">
+                            <div class="at-item at-new">
+                                <div class="index">
+                                    <i class="fal fa-plus"></i>
+                                </div>
+                                <span>Add a trigger condition</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 mb-4">
+                        <h3 class="at-title">Adjust the devices to</h3>
+                    </div>
+
+                    <div class="card card-1" at-type="action">
+                        <div class="card-body pointer">
+                            <div class="at-item at-new">
+                                <div class="index">
+                                    <i class="fal fa-plus"></i>
+                                </div>
+                                <span>Add an action</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex-center mt-5 mb-3">
+                        <button class="btn btn-lg btn-outline-danger rounded-pill w-100" action="atDelete">
+                            Delete automation
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <!-- Edit item modal -->
+    <div class="modal fade" id="atEditItemModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="btn btn-icon fs-4" action="atDiscard">
+                        <i class="fal fa-times" action="atDiscard"></i>
+                    </button>
+                    <button class="ms-auto btn btn-icon fs-4" action="atSave">
+                        <i class="fal fa-check" action="atSave"></i>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                    <h3 role="title" class="at-title"></h3>
+
+                    <div class="mt-5">
+                        <h3 class="at-title">Device</h3>
+                    </div>
+                    <div class="card card-1">
+                        <div class="card-body pointer">
+                            <select class="form-select form-select-lg form-none" name="did"></select>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <h3 class="at-title">Property</h3>
+                    </div>
+                    <div class="card card-1">
+                        <div class="card-body pointer">
+                            <select class="form-select form-select-lg form-none" name="prop"></select>
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        <h3 class="at-title">Value</h3>
+                    </div>
+                    <div class="card card-1">
+                        <div class="card-body">
+                            <input class="fs-5 my-2 w-100 form-none" type="text" name="value">
+                        </div>
+                    </div>
+
+                    <div class="d-flex-center mt-5 mb-3">
+                        <button class="btn btn-lg btn-outline-danger rounded-pill w-100"
+                            action="atDelete">Delete</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="atEditPeriodModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="btn btn-icon fs-4" action="atDiscard">
+                        <i class="fal fa-times" action="atDiscard"></i>
+                    </button>
+                    <button class="ms-auto btn btn-icon fs-4" action="atSave">
+                        <i class="fal fa-check" action="atSave"></i>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                    <h3 role="title" class="at-title">Effective period</h3>
+
+                    <div class="card card-1">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="fs-5">All day</span>
+                                <div class="ms-auto form-check form-check-lg">
+                                    <input class="form-check-input form-check-circle" type="checkbox" value="" id="defaultCheck1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-1">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="fs-5">Specific time period</span>
+                                <div class="ms-auto form-check form-check-lg">
+                                    <input class="form-check-input form-check-circle" type="checkbox" value="" id="defaultCheck1">
+                                </div>
+                            </div>
+                            <div class="collapse">
+                                <div class="d-flex fs-6 mt-3 align-items-center">
+                                    <span>
+                                        Start time
+                                    </span>
+                                    <input class="ms-auto form-control text-center" type="text" style="width: 70px;" value="12:12">
+                                </div>
+                                <div class="d-flex fs-6 mt-3 align-items-center">
+                                    <span>
+                                        End time
+                                    </span>
+                                    <input class="ms-auto form-control text-center" type="text" style="width: 70px;" value="12:12">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="card card-1 mt-4">
+                        <div class="card-body">
+                            <div class="d-flex-center fs-5">
+                                <span>Repeat</span>
+                                <span class="ms-auto text-muted">
+                                    Everyday
+                                    <i class="ms-2 fal fa-chevron-right fs-6"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Monday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Tuesday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Wednesday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Thursday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Friday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Saturday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                                <div class="d-flex-center fs-6 mt-3">
+                                    <span>Sunday</span>
+                                    <div class="ms-auto form-check form-check-lg">
+                                        <input type="checkbox" class="form-check-input form-check-circle">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="container-fluid" style="margin-top: 60px;">
+        <div class="row justify-content-center py-4 px-2">
+            <div class="col py-5" id="main" style="width: 100%; max-width: 600px;">
+
+                <div class="col-12 col-at-empty d-flex-center align-items-center d-none"
+                    style="height: calc(100vh - 250px);">
+                    <!-- <img src="https://i.imgur.com/LBk6ESa.png" width="300px" height="auto"> -->
+                    <img src="./empty-data.png" width="300px" height="auto" alt="">
+                </div>
+
+
+
+                <!-- <div class="card card-at border-0 shadow rounded-4 mb-5" at-id="">
+                    <div class="card-body d-flex align-items-center p-4">
+                        <span class="fs-4 fw-medium">{name}</span>
+                        <div class="ms-auto form-check form-check-lg form-switch">
+                            <input class="form-check-input" type="checkbox" action="atEnableToggle">
+                        </div>
+                    </div>
+                </div> -->
+
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.7/dist/notiflix-aio-3.2.7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/circular-progress-bar@2.1.0/public/circular-progress-bar.min.js"></script>
+    <script src="./utils.js"></script>
+    <script src="./model/ATModal.js"></script>
+    <script src="./model/Automation.js"></script>
+
+    <script>
+        var Devices = [
+            {
+                "did": "5922554",
+                "mac": "40:91:51:5a:5e:fa",
+                "id": "5922554",
+                "name": "Node1",
+                "type": "ESP8266",
+                "model": "security-board",
+                "fw_ver": "1",
+                "support": "get_props,get_prop,set_prop",
+                "props_name": "led,button",
+                "led": "false",
+                "button": "idle"
+            }
+        ]
+
+        var Automations = [
+            // {
+            //     id: 123,
+            //     enabled: true,
+            //     name: 'Automation 1',
+            //     matchType: 0,
+            //     triggers: [
+            //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'button', value: 'click' },
+            //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'led', value: 'false' }
+            //     ],
+            //     actions: [
+            //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'led', value: 'true' },
+            //     ]
+            // },
+            // {
+            //     id: 124,
+            //     enabled: true,
+            //     name: 'Automation 2',
+            //     matchType: 1,
+            //     triggers: [
+            //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'button', value: 'click' },
+            //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'led', value: 'true' }
+            //     ],
+            //     actions: [
+            //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'led', value: 'false' },
+            //     ]
+            // }
+            {
+                "id": 56567,
+                "enabled": true,
+                "name": "Toggle LED",
+                "match": 0,
+                "triggers": [
+                    {
+                        "type": 2,
+                        "first": "5922554",
+                        "second": "button",
+                        "third": "click"
+                    }
+                ],
+                "actions": [
+                    {
+                        "type": 2,
+                        "first": "6474413",
+                        "second": "r1",
+                        "third": "toggle"
+                    }
+                ]
+            }
+        ]
+
+
+
+
+
+
+
+
+
+
+
+        ATModal.init()
+
+        document.querySelector('[action="addAT"]').addEventListener('click', () => {
+            const at = new Automation({})
+            new ATEdit('add', at.data, at)
+        })
+
+        var atEmptyChecker = setInterval(() => {
+            // Check automations empty or not
+            for (const at of Automation.instances) {
+                if (at.el && at.isValid()) {
+                    document.querySelector('.col-at-empty').classList.add('d-none')
+                    clearInterval(atEmptyChecker)
+                    return
+                }
+            }
+            document.querySelector('.col-at-empty').classList.remove('d-none')
+        }, 300)
+
+
+
+        const rederAT = (data) => {
+            return data
+                .filter(at => {
+                    return at.triggers.length && at.triggers.every(t => t.type == '2') && at.actions.length && at.actions.every(a => a.type == '2')
+                })
+                .map(at => {
+                    at.matchType = at.match
+                    for (const t of at.triggers) {
+                        t.atType = t.type
+                        if (t.type == '2') {
+                            t.did = t.first
+                            t.dname = Devices.find(d => d.did == t.did)?.name || 'Unknown'
+                            t.prop = t.second
+                            t.value = t.third
+                        }
+                    }
+                    for (const a of at.actions) {
+                        a.atType = a.type
+                        if (a.type == '2') {
+                            a.did = a.first
+                            a.dname = Devices.find(d => d.did == a.did)?.name || 'Unknown'
+                            a.prop = a.second
+                            a.value = a.third
+                        }
+                    }
+                    return at
+                })
+        }
+
+
+        // GetDevices()
+        //     .then(data => {
+        //         Devices = data
+        //     })
+
+        // Loading.circle()
+
+        // GET(baseURI + '/auto/get')
+        //     .then(data => {
+        //         Loading.remove()
+        //         console.log(data)
+        //         if (!data || !Array.isArray(data) || !data.length) return
+        //         Automations = data
+        //             .filter(at => {
+        //                 return at.triggers.length && at.triggers.every(t => t.type == '2') && at.actions.length && at.actions.every(a => a.type == '2')
+        //             })
+        //             .map(at => {
+        //                 at.matchType = at.match
+        //                 for (const t of at.triggers) {
+        //                     t.atType = t.type
+        //                     if (t.type == '2') {
+        //                         t.did = t.first
+        //                         t.dname = Devices.find(d => d.did == t.did)?.name || 'Unknown'
+        //                         t.prop = t.second
+        //                         t.value = t.third
+        //                     }
+        //                 }
+        //                 for (const a of at.actions) {
+        //                     a.atType = a.type
+        //                     if (a.type == '2') {
+        //                         a.did = a.first
+        //                         a.dname = Devices.find(d => d.did == a.did)?.name || 'Unknown'
+        //                         a.prop = a.second
+        //                         a.value = a.third
+        //                     }
+        //                 }
+        //                 return at
+        //             })
+        //         console.log(Automations)
+        //         Automations.forEach(data => {
+        //             const el = new Automation(data)
+        //             el.appendTo($main)
+        //         })
+        //     })
+        //     .catch(err => {
+        //         Loading.remove()
+        //         notify('failure', `Failed to load automations: ${err.message}`)
+        //     })
+
+        Automations = rederAT(Automations)
+        Automations.forEach(data => {
+            const el = new Automation(data)
+            el.appendTo($main)
+        })
+
+
+        new bootstrap.Modal('#atEditPeriodModal').show()
+
+
+    </script>
+
+</body>
+
+</html>
