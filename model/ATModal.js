@@ -7,9 +7,13 @@ class ATModal {
             const action = el.getAttribute('action')
             switch (action) {
                 case 'atDiscard':
-                    Confirm.show('Discard', 'Are you sure you want to discard changes?', 'Discard', 'Cancel', () => {
+                    if (ATModal.currentModal?.isChanged()) {
+                        Confirm.show('Discard', 'Are you sure you want to discard changes?', 'Discard', 'Cancel', () => {
+                            ATModal.currentModal?.discard()
+                        })
+                    } else {
                         ATModal.currentModal?.discard()
-                    })
+                    }
                     break
                 case 'atSave':
                     ATModal.currentModal?.save()
@@ -28,6 +32,56 @@ class ATModal {
         } catch (e) { }
 
     }
+
+    constructor(data = {}) {
+        this.modal = null
+        this.data = data
+        this.oldData = duplicateObject(this.data)
+    }
+
+    isChanged() {
+        const _cmp = (a, b) => {
+            let changed = false
+            if (!isValid(a) || !isValid(b)) return compareInvalid(a, b)
+            for (const key in a) {
+                if (typeof a[key] === 'function') continue
+                if (typeof a[key] === 'object') {
+                    changed = changed || _cmp(a[key], b[key])
+                } else {
+                    changed = changed || a[key] !== b[key]
+                }
+                if (changed) {
+                    // console.log(key, a[key], b[key])
+                    return true
+                }
+            }
+            return changed
+        }
+        return _cmp(this.oldData, this.data)
+    }
+
+    destroy() {
+        ATModal.currentModal = null
+        bootstrap.Modal.getInstance(this.modal)?.hide()
+        this.data?.previousModal?.handleChanges && this.data.previousModal.handleChanges(this.data)
+    }
+
+    save() {
+        this.data && (this.data.lastAction = 'save')
+        this.destroy()
+    }
+
+    discard() {
+        this.data = this.oldData
+        this.data.lastAction = 'discard'
+        this.destroy()
+    }
+
+    delete() {
+        this.data && (this.data.lastAction = 'delete')
+        this.destroy()
+    }
+
 }
 
 
@@ -39,7 +93,7 @@ class ATModal {
 class ATEdit extends ATModal {
 
     static init() {
-        // match type select
+        // Render match type dropdown
         let matchTypes = []
         document.querySelectorAll("#atEditModal [name='atMatchType'] .select-option")?.forEach(el => {
             const opt = document.createElement('li')
@@ -58,12 +112,15 @@ class ATEdit extends ATModal {
                 opt.addEventListener('click', () => {
                     el.querySelectorAll('.select-option').forEach(opt => opt.removeAttribute('selected'))
                     el.querySelector(`[value="${opt.getAttribute('value')}"]`).setAttribute('selected', '')
+                    if (ATModal.currentModal?.data?.matchType != undefined) {
+                        ATModal.currentModal.data.matchType = opt.getAttribute('value')
+                    }
                 })
             })
             el.parentNode.appendChild(menu)
         }
 
-        // edit item
+        // Open edit item modal
         document.getElementById("atEditModal").addEventListener('click', (e) => {
             const el = e.target
             const item = el.closest('.at-item')
@@ -88,15 +145,19 @@ class ATEdit extends ATModal {
             }
         })
 
+        // Update value on change
+        document.querySelector('#atEditModal [name="atName"]').addEventListener('change', (e) => {
+            ATModal.currentModal?.data && (ATModal.currentModal.data.name = e.target.value)
+        })
+
     }
 
     constructor(action, data, atObject = null) {
-        super()
+        super(data)
         ATModal.currentModal = this
 
         this.modal = document.getElementById('atEditModal')
         this.action = action
-        this.data = data || {}
         this.atObject = atObject
         this.$title = this.modal.querySelector('[role="title"]')
         this.$delBtn = this.modal.querySelector('[action="atDelete"]')
@@ -117,7 +178,6 @@ class ATEdit extends ATModal {
             this.$delBtn.style.display = 'none'
             this.$title.textContent = 'Add new automation'
         } else {
-            this.oldData = duplicateObject(data)
             this.$delBtn.style.display = 'block'
             this.$title.textContent = 'Edit automation'
         }
@@ -223,8 +283,9 @@ class ATEdit extends ATModal {
     }
 
     destroy() {
-        ATModal.currentModal = null
-        bootstrap.Modal.getInstance(this.modal)?.hide()
+        // ATModal.currentModal = null
+        // bootstrap.Modal.getInstance(this.modal)?.hide()
+        super.destroy()
         document.querySelectorAll('.modal-backdrop').forEach(m => m.remove())
         this.atObject?.handleChanges(this.data)
     }
@@ -241,27 +302,22 @@ class ATEdit extends ATModal {
         }
         data.name = name
         data.matchType = match
-        // this.sendSaveRequest(data)
-        data.lastAction = this.action === 'add' ? 'add' : 'save'
         console.log(data)
-        this.destroy()
+        super.save()
     }
 
     discard() {
         if (this.action === 'edit') {
             this.data = this.oldData
         }
-        this.data.lastAction = 'discard'
-        this.destroy()
+        super.discard()
     }
 
     delete() {
-        // this.sendDeleteRequest(this.data)
-        this.data.lastAction = 'delete'
-        this.destroy()
+        super.delete()
     }
 
-    handleItemAction(data) {
+    handleChanges(data) {
         console.log(data)
 
         if (data.lastAction == 'delete') {
@@ -288,20 +344,26 @@ class ATEditItem extends ATModal {
         document.querySelectorAll("#atEditItemModal [name]").forEach(el => {
             el.addEventListener('change', () => {
                 const name = el.getAttribute('name')
-                if (name === 'did') {
-                    ATModal.currentModal?._selectDevice(el.value)
-                    ATModal.currentModal?._intPropsSelect()
+                if (ATModal.currentModal) {
+                    if (name === 'did') {
+                        // init deivce's props on change device
+                        ATModal.currentModal._selectDevice(el.value)
+                        ATModal.currentModal._intPropsSelect()
+                    }
+                    // Update data on change
+                    if (ATModal.currentModal.data[name]) {
+                        ATModal.currentModal.data[name] = el.value
+                    }
                 }
             })
         })
     }
 
     constructor(type, action, data) {
-        super()
+        super(data)
         ATModal.currentModal = this
 
         this.modal = document.getElementById('atEditItemModal')
-        this.data = data
         this.action = action
         this.$devices = this.modal.querySelector('[name="did"]')
         this.$props = this.modal.querySelector('[name="prop"]')
@@ -335,11 +397,10 @@ class ATEditItem extends ATModal {
     }
 
     destroy() {
-        ATModal.currentModal = null
-        bootstrap.Modal.getInstance(this.modal)?.hide()
-        this.data.previousModal?.handleItemAction(this.data)
+        super.destroy()
     }
 
+    // Init select options for devices
     _initDevicesSelect() {
         const { $devices } = this
         $devices.innerHTML = ''
@@ -351,13 +412,16 @@ class ATEditItem extends ATModal {
             $devices.appendChild(option)
         }
     }
+
+    // Select device by did
     _selectDevice(did) {
+        this.data.did = did
         const { $devices } = this
-        if (!did || did == 'null') {
+        if (did == '') {
             this._initDevicesSelect()
             // null option
             let nullOpt = document.createElement('option')
-            nullOpt.value = 'null'
+            nullOpt.value = ''
             nullOpt.innerHTML = 'Select a device'
             nullOpt.disabled = true
             nullOpt.selected = true
@@ -389,7 +453,7 @@ class ATEditItem extends ATModal {
         const { $props } = this
         $props.innerHTML = ''
         let did = this._getDevice()
-        if (!did || did == 'null') {
+        if (did == '') {
             let nullOpt = document.createElement('option')
             nullOpt.value = 'null'
             nullOpt.innerHTML = 'Select a device first'
@@ -410,7 +474,7 @@ class ATEditItem extends ATModal {
     }
     _propSelect(prop) {
         const did = this._getDevice()
-        if (!did || did == 'null') return
+        if (did == '') return
 
         const { $props } = this
         if (!prop) {
@@ -443,24 +507,19 @@ class ATEditItem extends ATModal {
             }
         }
         Object.assign(this.data, ndata)
-        this.data.lastAction = 'save'
-        this.destroy()
+        super.save()
     }
 
     delete() {
-        this.data.lastAction = 'delete'
-        this.destroy()
+        super.delete()
     }
 
     discard() {
-        this.data.lastAction = 'discard'
-        this.destroy()
+        super.discard()
     }
 }
 
-class ATEditPeriod {
-    static currentModal = null
-    
+class ATEditPeriod extends ATModal {
     static init() {
         document.querySelectorAll('.at-period .at-period-click').forEach(_ => {
             _.addEventListener('click', (e) => {
@@ -484,7 +543,7 @@ class ATEditPeriod {
             })
         })
         document.querySelector('.at-period-repeat .collapse-click').addEventListener('click', (e) => {
-            const collapse = new bootstrap.Collapse('.at-period-repeat .collapse').toggle()
+            new bootstrap.Collapse('.at-period-repeat .collapse').toggle()
             document.querySelector('.at-period-repeat .collapse-click i').classList.toggle('collapse-show')
         })
         document.querySelectorAll('.at-repeat-item').forEach($item => {
@@ -492,31 +551,54 @@ class ATEditPeriod {
                 if (e.target.tagName !== 'INPUT') {
                     $item.querySelector('input[type="checkbox"]').click()
                 }
-                ATEditPeriod.currentModal?.renderRepeat()
+                ATModal.currentModal?.renderRepeat()
             })
         })
     }
 
     constructor(data = {}) {
-        ATEditPeriod.currentModal = this
-        this.$modal = document.getElementById('atEditPeriodModal')
-        this.data = data
+        super(data)
+        ATModal.currentModal = this
+        this.modal = document.getElementById('atEditPeriodModal')
+        this.daysStr = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+        if (!data.period) data.period = 'all'
+        this.modal.querySelector(`.at-period[period="${data.period}"] input[type="checkbox"]`).checked = true
+
+        if (data.period_start) this.modal.querySelector('[name="period_start"]').value = data.period_start
+        if (data.period_end) this.modal.querySelector('[name="period_end"]').value = data.period_end
+
+        if (data.repeat) {
+            for (const day of this.daysStr) {
+                const $item = this.modal.querySelector(`.at-repeat-item[value="${day}"] input[type="checkbox"]`)
+                $item.checked = data.repeat[day] === true
+            }
+        }
 
         this.renderRepeat()
 
-        new bootstrap.Modal(this.$modal).show()
+        new bootstrap.Modal(this.modal).show()
     }
 
     destroy() {
-        ATEditPeriod.currentModal = null
-        bootstrap.Modal.getInstance(this.$modal)?.hide()
+        console.log(this.data)
+        super.destroy()
+    }
+
+    discard() {
+        super.discard()
+    }
+
+    save() {
+        this._getData()
+        super.save()
     }
 
     renderRepeat() {
         let repeat = {}
         let repeatValues
         let text = ""
-        this.$modal.querySelectorAll('.at-repeat-item').forEach(c => {
+        this.modal.querySelectorAll('.at-repeat-item').forEach(c => {
             repeat[c.getAttribute('value')] = c.querySelector('input[type="checkbox"]').checked
         })
         repeatValues = Object.values(repeat).filter(v => v)
@@ -542,16 +624,16 @@ class ATEditPeriod {
             text = text.join(', ')
             text = 'Every ' + text
         }
-        this.$modal.querySelector('.at-repeat-text').textContent = text
+        this.modal.querySelector('.at-repeat-text').textContent = text
         this.data.repeat = repeat
     }
 
     _getData() {
-        const $checked = this.$modal.querySelector('.at-period input[type="checkbox"]:checked')
+        const $checked = this.modal.querySelector('.at-period input[type="checkbox"]:checked')
         this.data.period = $checked?.closest('.at-period')?.getAttribute('period') || 'never'
         if (this.data.period) {
-            this.data.period_start = this.$modal.querySelector('[name="period_start"]')?.value || ''
-            this.data.period_end = this.$modal.querySelector('[name="period_end"]')?.value || ''
+            this.data.period_start = this.modal.querySelector('[name="period_start"]')?.value || ''
+            this.data.period_end = this.modal.querySelector('[name="period_end"]')?.value || ''
         }
         return this.data
     }

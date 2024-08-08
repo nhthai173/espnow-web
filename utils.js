@@ -43,27 +43,41 @@ const json2query = (json) => {
     return Object.keys(json).map(key => enurl(key) + '=' + enurl(json[key])).join('&')
 }
 
-const isPlainObject = (obj) => {
-    if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
-      return false;
-    }
-    let proto = Object.getPrototypeOf(obj);
-    while (proto) {
-      if (proto === Object.prototype) {
-        return true;
-      }
-      proto = Object.getPrototypeOf(proto);
-    }
-    return false;
-  }
-  
+const isPlainObject = (obj) => obj?.constructor === Object
+
+/**
+ * Returns true if the data is not null, undefined, empty string, empty array or empty object
+ * @param {*} d 
+ * @returns {boolean}
+ */
+const isValid = (d) => {
+    if (d === null || d === undefined || d === '') return false
+    if (Array.isArray(d) && d.length === 0) return false
+    if (isPlainObject(d) && Object.keys(d).length === 0) return false
+    return true
+}
+
+/**
+ * Compare 2 invalid values
+ * @param {*} a 
+ * @param {*} b 
+ * @return {boolean} true if both are the same
+ */
+const compareInvalid = (a, b) => {
+    if (isValid(a) || isValid(b)) return false
+    if (typeof a !== typeof b) return false
+    if (Array.isArray(a)) return Array.isArray(b) && b.length === 0
+    if (isPlainObject(a)) return isPlainObject(b) && Object.keys(b).length === 0
+    if (a === null) return b === null
+    if (a === undefined) return b === undefined
+}
 
 const duplicateObject = (obj) => {
-    let nObj = {}
+    let nObj = Array.isArray(obj) ? [] : {}
     for (let key in obj) {
         if (typeof obj[key] == 'function')
             continue
-        if (typeof obj[key] === 'object' && isPlainObject(obj[key])) {
+        if (typeof obj[key] === 'object' && (isPlainObject(obj[key]) || Array.isArray(obj[key]))) {
             nObj[key] = duplicateObject(obj[key])
         } else {
             nObj[key] = obj[key]
