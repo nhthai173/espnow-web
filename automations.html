@@ -304,7 +304,18 @@
 
                     <div class="card card-1 at-period" period="all">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center at-period-click">
+                                <span class="fs-5">Never</span>
+                                <div class="ms-auto form-check form-check-lg">
+                                    <input class="form-check-input form-check-circle" type="checkbox" value="" id="defaultCheck1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-1 at-period" period="all">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center at-period-click">
                                 <span class="fs-5">All day</span>
                                 <div class="ms-auto form-check form-check-lg">
                                     <input class="form-check-input form-check-circle" type="checkbox" value="" id="defaultCheck1">
@@ -315,7 +326,7 @@
 
                     <div class="card card-1 at-period" period="specific">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center at-period-click">
                                 <span class="fs-5">Specific time period</span>
                                 <div class="ms-auto form-check form-check-lg">
                                     <input class="form-check-input form-check-circle" type="checkbox" value="" id="defaultCheck1">
@@ -326,13 +337,13 @@
                                     <span>
                                         Start time
                                     </span>
-                                    <input class="ms-auto form-control text-center" type="text" style="width: 70px;" value="12:12">
+                                    <input class="ms-auto form-control text-center" name="period_start" type="text" style="width: 70px;" value="12:12">
                                 </div>
                                 <div class="d-flex fs-6 mt-3 align-items-center">
                                     <span>
                                         End time
                                     </span>
-                                    <input class="ms-auto form-control text-center" type="text" style="width: 70px;" value="12:12">
+                                    <input class="ms-auto form-control text-center" name="period_end" type="text" style="width: 70px;" value="12:12">
                                 </div>
                             </div>
                         </div>
@@ -627,7 +638,10 @@
         })
 
 
-        new ATEditPeriod()
+        const a = new ATEditPeriod()
+        setInterval(() => {
+            console.log(a._getData())
+        }, 1000)
 
 
     </script>

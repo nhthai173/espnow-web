@@ -462,17 +462,24 @@ class ATEditPeriod {
     static currentModal = null
     
     static init() {
-        document.querySelectorAll('.at-period').forEach($card => {
-            const period = $card.getAttribute('period')
-            $card.addEventListener('click', () => {
+        document.querySelectorAll('.at-period .at-period-click').forEach(_ => {
+            _.addEventListener('click', (e) => {
+                const $el = e.target
+                const $card = $el.closest('.at-period')
                 const $check = $card.querySelector('input[type="checkbox"]')
-                document.querySelectorAll('.at-period input[type="checkbox"]').forEach(c => {
-                    if (c != $check) c.checked = false
-                })
-                $check.checked = true
-                document.querySelectorAll('.at-period .collapse').forEach(c => bootstrap.Collapse.getInstance(c)?.hide())
-                if (period == 'specific') {
-                    new bootstrap.Collapse($card.querySelector('.collapse')).show()
+                if ($check) {
+                    document.querySelectorAll('.at-period input[type="checkbox"]').forEach(c => {
+                        if (c != $check) c.checked = false
+                    })
+                    $check.checked = true
+                }
+                if ($card?.getAttribute('period') == 'specific') {
+                    const $collapse = $card.querySelector('.collapse')
+                    if ($collapse && !$collapse.classList.contains('show')) {
+                        new bootstrap.Collapse($collapse).show()    
+                    }
+                } else {
+                    document.querySelectorAll('.at-period .collapse').forEach(c => bootstrap.Collapse.getInstance(c)?.hide())
                 }
             })
         })
@@ -490,7 +497,7 @@ class ATEditPeriod {
         })
     }
 
-    constructor(data) {
+    constructor(data = {}) {
         ATEditPeriod.currentModal = this
         this.$modal = document.getElementById('atEditPeriodModal')
         this.data = data
@@ -498,6 +505,11 @@ class ATEditPeriod {
         this.renderRepeat()
 
         new bootstrap.Modal(this.$modal).show()
+    }
+
+    destroy() {
+        ATEditPeriod.currentModal = null
+        bootstrap.Modal.getInstance(this.$modal)?.hide()
     }
 
     renderRepeat() {
@@ -531,6 +543,17 @@ class ATEditPeriod {
             text = 'Every ' + text
         }
         this.$modal.querySelector('.at-repeat-text').textContent = text
+        this.data.repeat = repeat
+    }
+
+    _getData() {
+        const $checked = this.$modal.querySelector('.at-period input[type="checkbox"]:checked')
+        this.data.period = $checked?.closest('.at-period')?.getAttribute('period') || 'never'
+        if (this.data.period) {
+            this.data.period_start = this.$modal.querySelector('[name="period_start"]')?.value || ''
+            this.data.period_end = this.$modal.querySelector('[name="period_end"]')?.value || ''
+        }
+        return this.data
     }
 
 }
