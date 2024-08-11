@@ -1,0 +1,114 @@
+[
+    {
+      "id": 56567,
+      "enabled": true,
+      "name": "Toggle LED",
+      "match": 0,
+      "triggers": [
+        {
+          "type": 2,
+          "first": "5922554",
+          "second": "button",
+          "third": "click"
+        }
+      ],
+      "actions": [
+        {
+          "type": 2,
+          "first": "6474413",
+          "second": "r1",
+          "third": "toggle"
+        }
+      ]
+    },
+    {
+      "id": 56568,
+      "enabled": true,
+      "name": "Turn On Light",
+      "match": 0,
+      "triggers": [
+        {
+          "type": 2,
+          "first": "6474415",
+          "second": "temperature",
+          "third": "below",
+          "value": "20"
+        }
+      ],
+      "actions": [
+        {
+          "type": 2,
+          "first": "6474414",
+          "second": "r1",
+          "third": "on"
+        }
+      ]
+    },
+    {
+      "id": 56569,
+      "enabled": false,
+      "name": "Unlock Door on Approach",
+      "match": 1,
+      "triggers": [
+        {
+          "type": 2,
+          "first": "6474413",
+          "second": "proximity",
+          "third": "near"
+        }
+      ],
+      "actions": [
+        {
+          "type": 2,
+          "first": "6474416",
+          "second": "locked",
+          "third": "unlock"
+        }
+      ]
+    },
+    {
+      "id": 56570,
+      "enabled": true,
+      "name": "Turn Off Plug at Night",
+      "match": 0,
+      "triggers": [
+        {
+          "type": 2,
+          "first": "time",
+          "second": "22:00",
+          "third": "daily"
+        }
+      ],
+      "actions": [
+        {
+          "type": 2,
+          "first": "6474417",
+          "second": "state",
+          "third": "off"
+        }
+      ]
+    },
+    {
+      "id": 56571,
+      "enabled": true,
+      "name": "Thermostat Control",
+      "match": 0,
+      "triggers": [
+        {
+          "type": 2,
+          "first": "6474415",
+          "second": "temperature",
+          "third": "above",
+          "value": "25"
+        }
+      ],
+      "actions": [
+        {
+          "type": 2,
+          "first": "6474415",
+          "second": "r1",
+          "third": "on"
+        }
+      ]
+    }
+  ]

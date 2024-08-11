@@ -91,13 +91,13 @@ const duplicateObject = (obj) => {
 
 
 let baseURI = ""
-baseURI = "http://192.168.0.88"
+baseURI = "http://localhost:3000"
 
 
 
 const GetDevices = async () => {
     Loading.circle()
-    return POST(baseURI + '/devices')
+    return GET(baseURI + '/devices')
     .then(data => {
         Loading.remove()
         console.log(data)

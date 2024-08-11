@@ -368,56 +368,56 @@
             }
         })
 
-        var ws = new WebSocket(baseURI + "/ws");
-        ws.onopen = (e) => console.log("WebSocket is open now.")
-        ws.onclose = (e) => console.log("WebSocket is closed now.")
-        ws.onerror = (e) => console.log("WebSocket error observed:", e)
-        ws.onmessage = (e) => {
-            const data = e.data
-            console.log(data)
-            if (data.startsWith("PAIRING_REMAINING_")) {
-                const [, , remaining, timeout] = data.split('_')
-                Pairing.show(remaining, timeout)
-            } else if (data.startsWith("PAIRING_END")) {
-                Pairing.hide()
-            } else if (data.startsWith("PAIRING_SUCCESS")) {
-                notify('success', 'Pairing success')
-                setTimeout(() => location.reload(), 1500)
-            } else if (data.startsWith("PAIRING_FAILURE")) {
-                notify('failure', 'Pairing failure')
-            } else if (data.startsWith("PAIRING_TIMEOUT")) {
-                notify('failure', 'Pairing timeout')
-            } else {
-                NodeCard.parseEvent(data)
-            }
-        }
+        // var ws = new WebSocket(baseURI + "/ws");
+        // ws.onopen = (e) => console.log("WebSocket is open now.")
+        // ws.onclose = (e) => console.log("WebSocket is closed now.")
+        // ws.onerror = (e) => console.log("WebSocket error observed:", e)
+        // ws.onmessage = (e) => {
+        //     const data = e.data
+        //     console.log(data)
+        //     if (data.startsWith("PAIRING_REMAINING_")) {
+        //         const [, , remaining, timeout] = data.split('_')
+        //         Pairing.show(remaining, timeout)
+        //     } else if (data.startsWith("PAIRING_END")) {
+        //         Pairing.hide()
+        //     } else if (data.startsWith("PAIRING_SUCCESS")) {
+        //         notify('success', 'Pairing success')
+        //         setTimeout(() => location.reload(), 1500)
+        //     } else if (data.startsWith("PAIRING_FAILURE")) {
+        //         notify('failure', 'Pairing failure')
+        //     } else if (data.startsWith("PAIRING_TIMEOUT")) {
+        //         notify('failure', 'Pairing timeout')
+        //     } else {
+        //         NodeCard.parseEvent(data)
+        //     }
+        // }
     </script>
 
     <script>
         var Devices = [
             {
-                "did": "5922554",
+                // "did": "5922554",
                 // "mac": "40:91:51:5a:5e:fa",
-                "id": "5922554",
-                "name": "Node1",
-                "online": "true",
+                // "id": "5922554",
+                // "name": "Node1",
+                // "online": "true",
                 // "type": "ESP8266",
                 // "model": "security-board",
                 // "fw_ver": "1",
                 // "support": "get_props,get_prop,set_prop",
-                "props_name": "led,button,volt", // node có những property gì?
-                "led": "false",
-                "button": "idle",
-                "volt": "3.3",
+                // "props_name": "led,button,volt", // node có những property gì?
+                // "led": "false",
+                // "button": "idle",
+                // "volt": "3.3",
             }
         ]
-        Devices.forEach(d => new NodeCard(d))
+        // Devices.forEach(d => new NodeCard(d))
 
-        // GetDevices().then(data => {
-        //    Devices = data
-        //    Devices.forEach(d => new NodeCard(d))
-        //    if (!data.length) emptyNode()
-        // })
+        GetDevices().then(data => {
+           Devices = data
+           Devices.forEach(d => new NodeCard(d))
+           if (!data.length) emptyNode()
+        })
     </script>
 
 </body>

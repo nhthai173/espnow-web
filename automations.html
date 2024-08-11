@@ -486,28 +486,30 @@
             //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'led', value: 'false' },
             //     ]
             // }
-            {
-                "id": 56567,
-                "enabled": true,
-                "name": "Toggle LED",
-                "match": 0,
-                "triggers": [
-                    {
-                        "type": 2,
-                        "first": "5922554",
-                        "second": "button",
-                        "third": "click"
-                    }
-                ],
-                "actions": [
-                    {
-                        "type": 2,
-                        "first": "6474413",
-                        "second": "r1",
-                        "third": "toggle"
-                    }
-                ]
-            }
+            
+            // {
+            //     "id": 56567,
+            //     "enabled": true,
+            //     "name": "Toggle LED",
+            //     "match": 0,
+            //     "triggers": [
+            //         {
+            //             "type": 2,
+            //             "first": "5922554",
+            //             "second": "button",
+            //             "third": "click"
+            //         }
+            //     ],
+            //     "actions": [
+            //         {
+            //             "type": 2,
+            //             "first": "6474413",
+            //             "second": "r1",
+            //             "third": "toggle"
+            //         }
+            //     ]
+            // }
+
         ]
 
 
@@ -541,7 +543,7 @@
 
 
 
-        const rederAT = (data) => {
+        const renderAT = (data) => {
             return data
                 .filter(at => {
                     return at.triggers.length && at.triggers.every(t => t.type == '2') && at.actions.length && at.actions.every(a => a.type == '2')
@@ -571,74 +573,42 @@
         }
 
 
-        // GetDevices()
-        //     .then(data => {
-        //         Devices = data
-        //     })
+        GetDevices()
+            .then(data => {
+                Devices = data
+            })
 
-        // Loading.circle()
+        Loading.circle()
 
-        // GET(baseURI + '/auto/get')
-        //     .then(data => {
-        //         Loading.remove()
-        //         console.log(data)
-        //         if (!data || !Array.isArray(data) || !data.length) return
-        //         Automations = data
-        //             .filter(at => {
-        //                 return at.triggers.length && at.triggers.every(t => t.type == '2') && at.actions.length && at.actions.every(a => a.type == '2')
-        //             })
-        //             .map(at => {
-        //                 at.matchType = at.match
-        //                 for (const t of at.triggers) {
-        //                     t.atType = t.type
-        //                     if (t.type == '2') {
-        //                         t.did = t.first
-        //                         t.dname = Devices.find(d => d.did == t.did)?.name || 'Unknown'
-        //                         t.prop = t.second
-        //                         t.value = t.third
-        //                     }
-        //                 }
-        //                 for (const a of at.actions) {
-        //                     a.atType = a.type
-        //                     if (a.type == '2') {
-        //                         a.did = a.first
-        //                         a.dname = Devices.find(d => d.did == a.did)?.name || 'Unknown'
-        //                         a.prop = a.second
-        //                         a.value = a.third
-        //                     }
-        //                 }
-        //                 return at
-        //             })
-        //         console.log(Automations)
-        //         Automations.forEach(data => {
-        //             const el = new Automation(data)
-        //             el.appendTo($main)
-        //         })
-        //     })
-        //     .catch(err => {
-        //         Loading.remove()
-        //         notify('failure', `Failed to load automations: ${err.message}`)
-        //     })
-
-        Automations = rederAT(Automations)
-        Automations.forEach(data => {
-            const el = new Automation(data)
-            el.appendTo($main)
-        })
+        GET(baseURI + '/auto/get')
+            .then(data => {
+                Loading.remove()
+                console.log(data)
+                if (!data || !Array.isArray(data) || !data.length) return
+                Automations = renderAT(data)
+                Automations.forEach(data => {
+                    const el = new Automation(data)
+                    el.appendTo($main)
+                })
+            })
+            .catch(err => {
+                Loading.remove()
+                notify('failure', `Failed to load automations: ${err.message}`)
+            })
 
 
-        const a = new ATEditPeriod({ 
-            period: 'all',
-            repeat: {
-                monday: true,
-                tuesday: true,
-                wednesday: true,
-                thursday: true,
-                friday: true,
-                saturday: true,
-                sunday: true
-            }
-        })
+        // const a = new ATEditPeriod({ 
+        //     period: 'all',
+        //     repeat: {
+        //         monday: true,
+        //         tuesday: true,
+        //         wednesday: true,
+        //         thursday: true,
+        //         friday: true,
+        //         saturday: true,
+        //         sunday: true
+        //     }
+        // })
 
 
     </script>
