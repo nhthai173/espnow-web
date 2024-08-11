@@ -108,8 +108,57 @@
         .collapse-click i {
             transition: all 0.3s;
         }
+
         .collapse-click i.collapse-show {
             transform: rotate(90deg);
+        }
+
+        .at-repeat-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+            cursor: pointer;
+            transition: all ease-in-out 0.2s;
+        }
+        .at-repeat-item.active {
+            background-color: var(--bs-primary-bg-subtle);
+            transition: all ease-in-out 0.3s;
+        }
+        .at-repeat-item span {
+            padding-left: 1rem;
+        }
+        .at-repeat-item .form-check {
+            margin-left: auto;
+            padding-right: 1rem;
+        }
+        .at-repeat-item:last-child {
+            padding-bottom: 1rem;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+
+        @media (max-width: 767px) {
+            .at-title {
+                font-size: 1.4em !important;
+                font-weight: 450;
+                margin-top: 0.3em;
+                margin-bottom: 0.4em;
+            }
+
+            .at-item .title {
+                font-size: 1.1em;
+            }
+
+            .at-item .subtitle {
+                font-size: 0.9em;
+            }
+
+            .form-select-lg {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
@@ -215,6 +264,15 @@
                         </div>
                     </div>
 
+                    <div class="card card-1 mt-5" at-type="period">
+                        <div class="card-body pointer">
+                            <div class="at-item at-edit py-2" style="margin: 0px;">
+                                <div class="fs-5 fw-medium">Effective time period</div>
+                                <div class="ms-auto me-5">All day</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex-center mt-5 mb-3">
                         <button class="btn btn-lg btn-outline-danger rounded-pill w-100" action="atDelete">
                             Delete automation
@@ -288,7 +346,8 @@
 
 
     <!-- Period modal -->
-    <div class="modal fade" id="atEditPeriodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="atEditPeriodModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down">
             <div class="modal-content">
                 <div class="modal-header">
@@ -326,13 +385,15 @@
                                     <span>
                                         Start time
                                     </span>
-                                    <input class="ms-auto form-control text-center" name="period_start" type="time" style="width: 100px;" value="12:12">
+                                    <input class="ms-auto form-control text-center" name="period_start" type="time"
+                                        style="width: 100px;">
                                 </div>
                                 <div class="d-flex fs-6 mt-3 align-items-center">
                                     <span>
                                         End time
                                     </span>
-                                    <input class="ms-auto form-control text-center" name="period_end" type="time" style="width: 100px;" value="12:12">
+                                    <input class="ms-auto form-control text-center" name="period_end" type="time"
+                                        style="width: 100px;">
                                 </div>
                             </div>
                         </div>
@@ -341,8 +402,8 @@
                     <hr>
 
                     <div class="card card-1 mt-4 at-period-repeat">
-                        <div class="card-body">
-                            <div class="d-flex-center fs-5 collapse-click">
+                        <div class="card-body p-0">
+                            <div class="d-flex-center fs-5 collapse-click p-3">
                                 <span>Repeat</span>
                                 <span class="ms-auto text-muted">
                                     <span class="at-repeat-text"></span>
@@ -350,45 +411,45 @@
                                 </span>
                             </div>
                             <div class="collapse">
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="monday">
+                                <div class="at-repeat-item" value="monday">
                                     <span>Monday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="tuesday">
+                                <div class="at-repeat-item" value="tuesday">
                                     <span>Tuesday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="wednesday">
+                                <div class="at-repeat-item" value="wednesday">
                                     <span>Wednesday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="thursday">
+                                <div class="at-repeat-item" value="thursday">
                                     <span>Thursday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="friday">
+                                <div class="at-repeat-item" value="friday">
                                     <span>Friday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="saturday">
+                                <div class="at-repeat-item" value="saturday">
                                     <span>Saturday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
-                                <div class="d-flex-center fs-6 mt-3 at-repeat-item" value="sunday">
+                                <div class="at-repeat-item" value="sunday">
                                     <span>Sunday</span>
-                                    <div class="ms-auto form-check form-check-lg">
+                                    <div class="form-check form-check-lg">
                                         <input type="checkbox" class="form-check-input form-check-circle">
                                     </div>
                                 </div>
@@ -486,7 +547,7 @@
             //         { type: '2', did: '5922554', dname: 'Node 1', prop: 'led', value: 'false' },
             //     ]
             // }
-            
+
             // {
             //     "id": 56567,
             //     "enabled": true,

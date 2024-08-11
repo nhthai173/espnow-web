@@ -22,7 +22,7 @@ Font Awesome là một thư viện icon miễn phí, mã nguồn mở, cung cấ
 
 - [ ] Thêm nhiều kiểu automation
   - [X] Chỉ hiện confirm khi thực sự có thay đổi khi discard từ modal chỉnh sửa
-  - [ ] Thêm khoảng thời gian hoạt động (effective period)
+  - [X] Thêm khoảng thời gian hoạt động (effective period)
     - [X] Thêm 1 modal và class mới gồm có "All day" và "Specific time" và mục "Repeat"
 - [ ] Validate data trong automation
 - [ ] Hỗ trợ type và description cho property

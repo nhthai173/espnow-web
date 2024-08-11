@@ -90,18 +90,6 @@ div#NotiflixNotifyWrap {
 }
 
 @media (max-width: 767px) {
-  .at-title {
-    font-size: 1.4em !important;
-    font-weight: 450;
-    margin-top: 0.3em;
-    margin-bottom: 0.4em;
-  }
-  .at-item .title {
-    font-size: 1.1em;
-  }
-  .at-item .subtitle {
-    font-size: 0.9em;
-  }
   .form-select-lg {
     font-size: 1.1em;
   }

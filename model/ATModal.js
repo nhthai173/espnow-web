@@ -29,6 +29,7 @@ class ATModal {
         try {
             ATEdit.init()
             ATEditItem.init()
+            ATEditPeriod.init()
         } catch (e) { }
 
     }
@@ -42,10 +43,13 @@ class ATModal {
     isChanged() {
         const _cmp = (a, b) => {
             let changed = false
+            // console.log('compare')
+            // console.log('old', a)
+            // console.log('new', b)
             if (!isValid(a) || !isValid(b)) return compareInvalid(a, b)
             for (const key in a) {
                 if (typeof a[key] === 'function') continue
-                if (typeof(a[key]) === 'object' && (!isPlainObject(a[key]) && !Array.isArray(a[key])))
+                if (typeof (a[key]) === 'object' && (!isPlainObject(a[key]) && !Array.isArray(a[key])))
                     continue
                 if (typeof a[key] === 'object') {
                     changed = changed || _cmp(a[key], b[key])
@@ -130,20 +134,32 @@ class ATEdit extends ATModal {
             const type = item.closest('.card')?.getAttribute('at-type')
             const action = item.classList.contains('at-new') ? 'add' : (item.classList.contains('at-edit') ? 'edit' : null)
             if (!type || !action) return
-            const data = {
+            let data = {
                 previousModal: ATModal.currentModal,
-                type,
-                index: item.getAttribute('index') || '',
-                dname: item.getAttribute('dname') || '',
-                did: item.getAttribute('did') || '',
-                prop: item.getAttribute('prop') || '',
-                value: item.getAttribute('value') || ''
+                type
             }
-            setTimeout(() => {
-                new ATEditItem(type, action, data)
-            }, 100);
-            if (!isMobile) {
-                ATModal.currentModal?.destroy()
+            if (type === 'trigger' || type === 'action') {
+                data.index = item.getAttribute('index') || ''
+                data.dname = item.getAttribute('dname') || ''
+                data.did = item.getAttribute('did') || ''
+                data.prop = item.getAttribute('prop') || ''
+                data.value = item.getAttribute('value') || ''
+                setTimeout(() => {
+                    new ATEditItem(type, action, data)
+                }, 100);
+                if (!isMobile) {
+                    ATModal.currentModal?.destroy()
+                }
+            } else if (type === 'period') {
+                if (!ATModal.currentModal) return
+                const period = ATModal.currentModal.data?.effective || {}
+                data = { ...data, ...period }
+                setTimeout(() => {
+                    new ATEditPeriod(data)
+                }, 100)
+                if (!isMobile) {
+                    ATModal.currentModal?.destroy()
+                }
             }
         })
 
@@ -322,10 +338,17 @@ class ATEdit extends ATModal {
     handleChanges(data) {
         console.log(data)
 
-        if (data.lastAction == 'delete') {
-            this._remove(data.type, data.index)
-        } else if (data.lastAction == 'save') {
-            this._set(data.type, data)
+        if (data.type == 'trigger' || data.type == 'action') {
+            if (data.lastAction == 'delete') {
+                this._remove(data.type, data.index)
+            } else if (data.lastAction == 'save') {
+                this._set(data.type, data)
+            }
+        } else if (data.type == 'period') {
+            if (data.lastAction == 'save') {
+                this.data.effective = data
+                // @TODO render effective period
+            }
         }
 
         new bootstrap.Modal('#atEditModal').show()
@@ -339,7 +362,7 @@ class ATEdit extends ATModal {
 
 /**
  * Modal add/edit trigger/action
- */ 
+ */
 class ATEditItem extends ATModal {
 
     static init() {
@@ -523,49 +546,77 @@ class ATEditItem extends ATModal {
 
 class ATEditPeriod extends ATModal {
     static init() {
-        document.querySelectorAll('.at-period .at-period-click').forEach(_ => {
-            _.addEventListener('click', (e) => {
-                const $el = e.target
-                const $card = $el.closest('.at-period')
-                const $check = $card.querySelector('input[type="checkbox"]')
-                if ($check) {
-                    document.querySelectorAll('.at-period input[type="checkbox"]').forEach(c => {
-                        if (c != $check) c.checked = false
-                    })
-                    $check.checked = true
-                }
-                if ($card?.getAttribute('period') == 'specific') {
-                    const $collapse = $card.querySelector('.collapse')
-                    if ($collapse && !$collapse.classList.contains('show')) {
-                        new bootstrap.Collapse($collapse).show()    
-                    }
-                } else {
-                    document.querySelectorAll('.at-period .collapse').forEach(c => bootstrap.Collapse.getInstance(c)?.hide())
-                }
+        // effective period select
+        document.querySelectorAll('.at-period .at-period-click').forEach(el => {
+            el.addEventListener('click', (e) => {
+                ATModal.currentModal?.selectPeriod(el.closest('.at-period')?.getAttribute('period'))
             })
         })
+
+        // effective specific period
+        document.querySelectorAll('.at-period[period="specific"] input[name]').forEach($input => {
+            $input.addEventListener('input', (e) => {
+                const name = $input.getAttribute('name')
+                if (!ATModal.currentModal) return
+                ATModal.currentModal.data[name] = $input.value
+            })
+        })
+
+        // effective repeat collapse
         document.querySelector('.at-period-repeat .collapse-click').addEventListener('click', (e) => {
             new bootstrap.Collapse('.at-period-repeat .collapse').toggle()
             document.querySelector('.at-period-repeat .collapse-click i').classList.toggle('collapse-show')
         })
+        console.log('init')
+
+        // effective repeat select
         document.querySelectorAll('.at-repeat-item').forEach($item => {
             $item.addEventListener('click', (e) => {
                 if (e.target.tagName !== 'INPUT') {
-                    $item.querySelector('input[type="checkbox"]').click()
+                    const $check = $item.querySelector('input[type="checkbox"]')
+                    $check.click()
+                    $check.dispatchEvent(new Event('change'))
                 }
                 ATModal.currentModal?.renderRepeat()
+            })
+            $item.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                const $item = e.target.closest('.at-repeat-item')
+                e.target.checked ? $item.classList.add('active') : $item.classList.remove('active')
             })
         })
     }
 
+    /**
+     * Fill the blank data with default value
+     * @param {Object} data 
+     * @returns {Object}
+     */
+    static default(data = {}) {
+        if (!data.period) data.period = 'all'
+        if (!data.period_start) data.period_start = ''
+        if (!data.period_end) data.period_end = ''
+        if (!data.repeat) {
+            data.repeat = {
+                monday: true,
+                tuesday: true,
+                wednesday: true,
+                thursday: true,
+                friday: true,
+                saturday: true,
+                sunday: true
+            }
+        }
+        return data
+    }
+
     constructor(data = {}) {
+        data = ATEditPeriod.default(data)
         super(data)
         ATModal.currentModal = this
         this.modal = document.getElementById('atEditPeriodModal')
         this.daysStr = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
-        if (!data.period) data.period = 'all'
-        this.modal.querySelector(`.at-period[period="${data.period}"] input[type="checkbox"]`).checked = true
+        this.selectPeriod(this.data.period)
 
         if (data.period_start) this.modal.querySelector('[name="period_start"]').value = data.period_start
         if (data.period_end) this.modal.querySelector('[name="period_end"]').value = data.period_end
@@ -574,26 +625,62 @@ class ATEditPeriod extends ATModal {
             for (const day of this.daysStr) {
                 const $item = this.modal.querySelector(`.at-repeat-item[value="${day}"] input[type="checkbox"]`)
                 $item.checked = data.repeat[day] === true
+                $item.dispatchEvent(new Event('change'))
             }
         }
 
         this.renderRepeat()
+        bootstrap.Collapse.getInstance(this.modal.querySelector('.at-period-repeat .collapse'))?.hide()
+
+        console.log(this.data)
 
         new bootstrap.Modal(this.modal).show()
     }
 
-    destroy() {
-        console.log(this.data)
-        super.destroy()
-    }
-
-    discard() {
-        super.discard()
-    }
-
     save() {
-        this._getData()
+        const validate = this.validate()
+        if (!validate.ok) {
+            Confirm.show('Please fill all fields', validate.msg, 'OK')
+            return
+        }
         super.save()
+    }
+
+    validate() {
+        let ret = { ok: false, msg: '' }
+        if (this.data.period == 'specific') {
+            const start = this.modal.querySelector('[name="period_start"]').value
+            const end = this.modal.querySelector('[name="period_end"]').value
+            if (start == '' || end == '') {
+                ret.msg = 'Please fill all fields'
+                return ret
+            }
+        }
+        ret.ok = true
+        return ret
+    }
+
+    selectPeriod(period) {
+        if (!period) return
+        this.data.period = period
+        const $card = this.modal.querySelector(`.at-period[period="${period}"]`)
+        if (!$card) return
+        const $check = $card.querySelector('input[type="checkbox"]')
+        if ($check) {
+            this.modal.querySelectorAll('.at-period input[type="checkbox"]').forEach(c => {
+                if (c != $check) c.checked = false
+            })
+            $check.checked = true
+        }
+        if ($card.getAttribute('period') == 'specific') {
+            const $collapse = $card.querySelector('.collapse')
+            if ($collapse && !$collapse.classList.contains('show')) {
+                new bootstrap.Collapse($collapse).show()
+            }
+            $card.querySelectorAll('input[name]').forEach($input => $input.dispatchEvent(new Event('input')))
+        } else {
+            this.modal.querySelectorAll('.at-period .collapse').forEach(c => bootstrap.Collapse.getInstance(c)?.hide())
+        }
     }
 
     renderRepeat() {
@@ -630,16 +717,4 @@ class ATEditPeriod extends ATModal {
         this.data.repeat = repeat
     }
 
-    _getData() {
-        const $checked = this.modal.querySelector('.at-period input[type="checkbox"]:checked')
-        this.data.period = $checked?.closest('.at-period')?.getAttribute('period') || 'never'
-        if (this.data.period) {
-            this.data.period_start = this.modal.querySelector('[name="period_start"]')?.value || ''
-            this.data.period_end = this.modal.querySelector('[name="period_end"]')?.value || ''
-        }
-        return this.data
-    }
-
 }
-
-ATEditPeriod.init()
