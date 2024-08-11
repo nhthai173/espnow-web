@@ -45,6 +45,8 @@ class ATModal {
             if (!isValid(a) || !isValid(b)) return compareInvalid(a, b)
             for (const key in a) {
                 if (typeof a[key] === 'function') continue
+                if (typeof(a[key]) === 'object' && (!isPlainObject(a[key]) && !Array.isArray(a[key])))
+                    continue
                 if (typeof a[key] === 'object') {
                     changed = changed || _cmp(a[key], b[key])
                 } else {
